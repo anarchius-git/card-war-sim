@@ -68,11 +68,66 @@
 
 <div id="game-controls" class="container bg-light">
 	<div class="row">
-		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-name" onclick="printHand(2,false)">Name Arena</button></div>
+		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-name" data-toggle="modal" data-target="#nameArenaModal">Name Arena</button></div>
 		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-shuffle" onclick="shuffleDeck()">Open New Deck & Shuffle</button></div>
 		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-play" onclick="playGame()">Deal & Play</button></div>
 	</div>
 </div> <!-- End container for game controls
+
+<!-- The Modal -->
+<div class="modal fade" id="nameArenaModal">
+	<div class="modal-dialog">
+	<div class="modal-content">
+
+	<!-- Modal Header -->
+	<div class="modal-header">
+		<h4 class="modal-title">Update Player and Arena Names</h4>
+		<button type="button" class="close" data-dismiss="modal">&times;</button>
+	</div>
+
+	<!-- Modal body -->
+	<div class="modal-body">
+		<div class="form-group">
+			<label for="p1-name-text">Player 1 Name:</label>
+			<input type="text" class="form-control" id="p1-name-text">
+		</div>
+		<div class="form-group">
+			<label for="p2-name-text">Player 2 Name:</label>
+			<input type="text" class="form-control" id="p2-name-text">
+		</div>
+		<div class="form-group">
+			<label for="arena-name-text">Arena Name:</label>
+			<input type="text" class="form-control" id="arena-name-text">
+		</div>
+	</div>
+
+	<!-- Modal footer -->
+	<div class="modal-footer">
+		<button type="button" class="btn btn-primary" id="update-names-modal">Update</button>
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	</div>
+
+	</div>
+	</div>
+</div>
+
+<!-- The script for the modal goes here, to simplify things -->
+<script> 
+
+$("#nameArenaModal").on('show.bs.modal',function(){
+	document.getElementById("p1-name-text").value = document.getElementById("p1-name").innerHTML;
+	document.getElementById("p2-name-text").value = document.getElementById("p2-name").innerHTML;
+	document.getElementById("arena-name-text").value = document.getElementById("arena-name").innerHTML;
+});
+
+$("#update-names-modal").click(function(){
+	document.getElementById("p1-name").innerHTML = document.getElementById("p1-name-text").value;
+	document.getElementById("p2-name").innerHTML = document.getElementById("p2-name-text").value;
+	document.getElementById("arena-name").innerHTML = document.getElementById("arena-name-text").value;
+});
+
+</script>
+
 
 </body>
 </html>

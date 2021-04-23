@@ -8,6 +8,7 @@ var shuffleTimes = 0;
 var refreshTimer;
 var gameRunning = false;
 var gameTaunt = "";
+const gameSpeed = 50; // This is the constant that is handling game speed. Smaller the number, faster the gameplay. All pauses should key off this value.
 
 function getSuit(cardID){
 	// A foundational function that returns the suite of a card given the card id
@@ -18,33 +19,34 @@ function getSuit(cardID){
 function getRank(cardID) {
 	// A foundational function that returns the rank of a given card id
 	// Card ID is 0 through 51. Rank is the mod of 13 and adding 1 to account for the 0-base.
+	// This function returns the rank, but it does not return the FACE of a card
 	return (parseInt(cardID) % 13) + 1;
 }
 
 function printCard(playerID, cardID, emptyFlag = false) {
-	// This function prints a card for a given player and a given card
+	// This function prints a card in the Arena for a given player and a given card. This function does not print the "Hand" of a player
 	// playerID 1 or 2 refering to either player
-	// cardID 0..51 refering to a 0-base suit and rank definitions; -1 refers to facedown
+	// cardID 0..51 refering to a 0-base suit and rank definitions; -1 refers to a facedown card in the Arena
+	// emptyFlag refers to whether the arena is empty or not. If this flag comes in as true, then the rest of the information is ignored
+	
 	var suitClass = "";
 	var rankData = "";
 	
-	//console.log("Printing Card. Player - " + playerID + " card ID - " + cardID + " empty flag - " + emptyFlag);
-	
 	if (emptyFlag) {
-		// The card set is empty, make the card lighter
+		// There are no cards to display. So the UI should be changed to be lighter and not show rank
 		document.getElementById("p" + playerID + "-play-card").className = "card bg-light text-muted";
 		suitClass = "playing-card empty";
 	} else {
-		// A card exists to make the card dark
+		// We are displaying a card, either face up or face down, determined by the cardID that is presented
 		document.getElementById("p" + playerID + "-play-card").className = "card bg-dark text-white";
 		if (cardID < 0) {
 			suitClass = "playing-card facedown";
 			rankData = "";
 		} else {
 
-			var suitID = getSuit(cardID); //Math.floor(parseInt(cardID) / 13);
-			var rankID = getRank(cardID); //(parseInt(cardID) % 13) + 1;
-			// determine the suit class
+			var suitID = getSuit(cardID);
+			var rankID = getRank(cardID);
+			// Translate the Suit ID to the set of classes needed to display the suit
 			// 0 = clubs; 1 = diamonds; 2 = hearts; 3 = spades
 			switch(suitID) {
 				case 0:
@@ -62,7 +64,7 @@ function printCard(playerID, cardID, emptyFlag = false) {
 				default:
 				console.log("Error: incorrect Suit ID: " + suitID);		
 			}
-			// RankID correction
+			// Translate the Rank ID to the Rank Face (called data below). Translate the face cards and Aces
 			rankData = rankID.toString();
 			switch(rankID) {
 				case 1:
@@ -80,25 +82,22 @@ function printCard(playerID, cardID, emptyFlag = false) {
 			}
 		}
 	}
-	//console.log(cardID, suitID, rankID, suitClass, rankData);
-	// First set the classes on the card
+	// First set the Suit Classes on the Card, which allows the display of the suit.
+	// This handles all four suits as well as the facedown and empty scenario
 	document.getElementById("p" + playerID + "-play-header").className = suitClass;
 	document.getElementById("p" + playerID + "-play-body").className = suitClass;
 	document.getElementById("p" + playerID + "-play-footer").className = suitClass;
-	// Then set the custom attributes
+	// Then set the custom attributes to handle the rank display
+	// Actual rank display happens via custom attributes in CSS
 	document.getElementById("p" + playerID + "-play-header").setAttribute("data-rank",rankData);
 	document.getElementById("p" + playerID + "-play-body").setAttribute("data-rank",rankData);
 	document.getElementById("p" + playerID + "-play-footer").setAttribute("data-rank",rankData);
-	// Add the handling for empty cards
-	//if (cardID < 0) {
-	//	document.getElementById("p" + playerID + "-play-body").setAttribute("data-rank","•");
-	//}
 }
 
 function printHand(playerID, emptyFlag){
-	// The purpose of this page is to print the hand of a given player.
+	// The purpose of this page is to print the hand of a given player. This is different from the Arena display
 	// Player is 1 or 2
-	// Count is basically binary, 0 means we print an empty hand. Else we print face down
+	// emptyFlag is boolean, true means we print an empty hand. false means we print face down
 	if (emptyFlag) {
 		document.getElementById("p" + playerID + "-hand-card").className = "card bg-light text-muted";
 		document.getElementById("p" + playerID + "-hand-header").className = "playing-card empty";
@@ -118,12 +117,12 @@ async function playGame() {
 	//shuffleDeck();
 	console.log("Shuffling the deck");
 	shuffleDeck();
-	await sleep(2000); // sleep for 2 seconds
+	await sleep(40 * gameSpeed); // sleep for 2 seconds
 	// Empty the front of the card
 	printCard(1,-1,false);
 	printCard(2,-1,false);
 	await dealDeck();
-	pause(1500);
+	pause(30 * gameSpeed);
 	// Show that the decks are dealt
 	printCard(1,-1,true);
 	printCard(2,-1,true);
@@ -147,36 +146,37 @@ async function playGame() {
 			//await sleep(2000); // this is needed for some reason, pause does not work here
 			p1Arena.push(p1Hand.shift());
 			p2Arena.push(p2Hand.shift());
-			logDecks();
+			logArena();
 			await doBattle();
 		}
 	}
 }
 
 async function doBattle(){
-	// returns whether the game is still running
-	await sleep(1000);
+	// This is the battle function.
+	// This compares the last cards on the Arena (i.e., the cards on the top of the arena pile) and decides based on their relative ranks
+	await sleep(20 * gameSpeed);
 	if(getRank(p1Arena[p1Arena.length - 1]) > getRank(p2Arena[p2Arena.length - 1])){
 		// player 1 wins battle
 		gameTaunt = "Player 1 Wins!"
 		while(p2Arena.length > 0){ p1Arena.push(p2Arena.shift()); } // collect all cards in the winner's arena
-		await sleep(500);
-		logDecks();
+		await sleep(10 * gameSpeed);
+		logArena();
 		while(p1Arena.length > 0){
 			p1Hand.push(p1Arena.pop());
-			await sleep(75);
-			logDecks();
+			await sleep(2 * gameSpeed);
+			logArena();
 		}
 	} else if(getRank(p1Arena[p1Arena.length - 1]) < getRank(p2Arena[p2Arena.length - 1])){
 		// player 2 wins
 		gameTaunt = "Player 2 Wins!"
 		while(p1Arena.length > 0){ p2Arena.push(p1Arena.shift()); } // collect all cards in the winner's arena
-		await sleep(500);
-		logDecks();
+		await sleep(10 * gameSpeed);
+		logArena();
 		while(p2Arena.length > 0){
 			p2Hand.push(p2Arena.pop());
-			await sleep(75);
-			logDecks();
+			await sleep(2 * gameSpeed);
+			logArena();
 		}
 	} else {
 		// war
@@ -185,12 +185,19 @@ async function doBattle(){
 	}
 }
 
-function logDecks(){
-	console.log(p1Arena);
-	console.log(p2Arena);
+function logArena(){
+	console.log("Player 1 Arena: ", p1Arena);
+	console.log("Player 2 Arena: ", p2Arena);
+}
+
+function logHands(){
+	console.log("Player 1 Hand: ", p1Hand);
+	console.log("Player 2 Hand: ", p2Hand);
 }
 
 function printArena(){
+	// This function refreshes the whole playing Arena. This function is designed to be set to an Interval
+	// Print the correct cards
 	if(p1Arena.length == 0){
 		printCard(1,-1,true);
 	} else {
@@ -201,10 +208,10 @@ function printArena(){
 	} else {
 		printCard(2,p2Arena[p2Arena.length - 1],false);
 	}
-	document.getElementById("p1-score").innerHTML = p1Hand.length;
-	document.getElementById("p2-score").innerHTML = p2Hand.length;
-	document.getElementById("taunt").innerHTML = gameTaunt;
-	//pause(500);
+	// Update the scores and taunt messages
+	document.getElementById("p1-score").innerText = p1Hand.length;
+	document.getElementById("p2-score").innerText = p2Hand.length;
+	document.getElementById("taunt").innerText = gameTaunt;
 }
 
 function dealDeck() {
@@ -213,8 +220,7 @@ function dealDeck() {
 		p1Hand.push(deck.shift());
 		p2Hand.push(deck.shift());
 	}
-	console.log(p1Hand);
-	console.log(p2Hand);
+	logHands();
 }
 
 function shuffleDeck() {
