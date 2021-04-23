@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>This • is • WAR!</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="war-scripts.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>This is WAR!</h1>
+  <p>A simulator of the card game War, in Javascript and HTML</p>
+</div>
+<br/>
+
+<div class="container">
+	<div class="row">
+		<div class="col-sm-3"><h2 id="p1-name">Player 1</h2></div>
+		<div class="col-sm-6" style="text-align:center"><h2 id="arena-name">The Arena</h2></div>
+		<div class="col-sm-3"><h2 id="p2-name">Player 2</h2></div>
+	</div>
+	<br/><br/>
+	<div class="row">
+		<div class="col-sm-3" id="p1-hand">
+			<div class="card bg-light text-muted" id="p1-hand-card">
+				<div class="card-header"><span data-rank="" class="playing-card empty" id="p1-hand-header"></div>
+				<div class="card-body" style="text-align:center"><span data-rank="" class="playing-card empty" id="p1-hand-body"></span></div>
+				<div class="card-footer"><span data-rank="" class="playing-card empty" id="p1-hand-footer"></div>
+			</div>
+		</div>
+		<div class="col-sm-3" id="p1-play">
+			<div class="card bg-light text-muted" id="p1-play-card">
+				<div class="card-header"><span data-rank="" class="playing-card empty" id="p1-play-header"></div>
+				<div class="card-body" style="text-align:center"><span data-rank="" class="playing-card empty" id="p1-play-body"></span></div>
+				<div class="card-footer"><span data-rank="" class="playing-card empty" id="p1-play-footer"></div>
+			</div>
+		</div>
+		<div class="col-sm-3" id="p2-play">
+			<div class="card bg-light text-muted" id="p2-play-card">
+				<div class="card-header"><span data-rank="" class="playing-card empty" id="p2-play-header"></div>
+				<div class="card-body" style="text-align:center"><span data-rank="" class="playing-card empty" id="p2-play-body"></div>
+				<div class="card-footer"><span data-rank="" class="playing-card empty" id="p2-play-footer"></div>
+			</div>
+		</div>
+		<div class="col-sm-3" id="p2-hand">
+			<div class="card bg-light text-muted" id="p2-hand-card">
+				<div class="card-header"><span data-rank="" class="playing-card empty" id="p2-hand-header"></div>
+				<div class="card-body" style="text-align:center"><span data-rank="" class="playing-card empty" id="p2-hand-body"></span></div>
+				<div class="card-footer"><span data-rank="" class="playing-card empty" id="p2-hand-footer"></div>
+			</div>
+		</div>
+	</div>
+	<br/>
+	<div class="row"> <!-- This is the score row-->
+		<div class="col-sm-3"><h3>Deck size: <span id="p1-score"></span></h3></div>
+		<div class="col-sm-6" style="text-align:center"><h3><span id="taunt"></span></h3></div>
+		<div class="col-sm-3"><h3>Deck size: <span id="p2-score"></span></h3></div>
+	</div>
+</div> <!-- End container for the players and arena-->
+<br/>
+
+<div id="game-controls" class="container bg-light">
+	<div class="row">
+		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-name" onclick="printHand(2,false)">Name Arena</button></div>
+		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-shuffle" onclick="shuffleDeck()">Open New Deck & Shuffle</button></div>
+		<div class="col-sm-4" style="text-align:center"><button type="button" class="btn btn-primary" id="gme-ctr-play" onclick="playGame()">Deal & Play</button></div>
+	</div>
+</div> <!-- End container for game controls
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+/*** Playing Cards ***/
+
+.playing-card::before{content:attr(data-rank)}
+.card-body .playing-card {
+	text-align: center;
+	font-size: 100px;
+}
+.card-header .playing-card {
+	font-size: 20px;
+}
+.card-footer .playing-card {
+	font-size: 20px;
+	float: right;
+}
+
+.spades::after{content:"\2660"}
+.hearts::after{content:"\2665";color:red}
+.diamonds::after{content:"\2666";color:red}
+.clubs::after{content:"\2663"}
+
+.card-header .facedown::after{content:"\2663 \2666 \2660 \2665"}
+.card-body .facedown::after{content:"\2022"}
+.card-footer .facedown::after{content:"\2663 \2666 \2660 \2665"; color:red}
+
+.card-header .empty::after{content:"\2022"}
+.card-body .empty::after{content:"\2022"}
+.card-footer .empty::after{content:"\2022"}
+
+/*** Other corrections ***/
+#game-controls {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
