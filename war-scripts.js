@@ -8,6 +8,8 @@ var shuffleTimes = 0;
 var refreshTimer;
 var gameRunning = false;
 var gameTaunt = "";
+var player1Name = "Player 1"
+var player2Name = "Player 2"
 const gameSpeed = 50; // This is the constant that is handling game speed. Smaller the number, faster the gameplay. All pauses should key off this value.
 
 function getSuit(cardID){
@@ -122,12 +124,12 @@ async function playGame() {
 	printCard(1,-1,false);
 	printCard(2,-1,false);
 	await dealDeck();
-	pause(30 * gameSpeed);
 	// Show that the decks are dealt
 	printCard(1,-1,true);
 	printCard(2,-1,true);
 	printHand(1,false);
 	printHand(2,false);
+	await sleep(20 * gameSpeed);
 	// Main game loop
 	gameRunning = true;
 	refreshTimer = setInterval(printArena, 100);
@@ -137,13 +139,12 @@ async function playGame() {
 			// stop the game
 			gameRunning = false;
 			clearInterval(refreshTimer); //stop the refresh
-			printArena(); // just print it at some point
+			printArena(); // Print one last time to make sure the UI is caught up
 			if(p1Hand.length == 0) { printHand(1, true);}
 			if(p2Hand.length == 0) { printHand(2, true);}
 			// logic to determine winner goes here
 		} else {
-			// Each player deals a hand
-			//await sleep(2000); // this is needed for some reason, pause does not work here
+			// Each player deals a card from their hand
 			p1Arena.push(p1Hand.shift());
 			p2Arena.push(p2Hand.shift());
 			logArena();
@@ -158,30 +159,58 @@ async function doBattle(){
 	await sleep(20 * gameSpeed);
 	if(getRank(p1Arena[p1Arena.length - 1]) > getRank(p2Arena[p2Arena.length - 1])){
 		// player 1 wins battle
-		gameTaunt = "Player 1 Wins!"
-		while(p2Arena.length > 0){ p1Arena.push(p2Arena.shift()); } // collect all cards in the winner's arena
-		await sleep(10 * gameSpeed);
-		logArena();
-		while(p1Arena.length > 0){
-			p1Hand.push(p1Arena.pop());
-			await sleep(2 * gameSpeed);
-			logArena();
-		}
+		gameTaunt = player1Name + " Wins!"
+		while(p2Arena.length > 0){ p1Arena.push(p2Arena.shift()); await sleep(2 * gameSpeed); logArena();} // collect all cards in the winner's arena
+		await sleep(6 * gameSpeed);
+		while(p1Arena.length > 0){ p1Hand.push(p1Arena.pop()); await sleep(2 * gameSpeed); logArena();} // move the cards from the arena to the hand
+		await sleep(6 * gameSpeed);
 	} else if(getRank(p1Arena[p1Arena.length - 1]) < getRank(p2Arena[p2Arena.length - 1])){
-		// player 2 wins
-		gameTaunt = "Player 2 Wins!"
-		while(p1Arena.length > 0){ p2Arena.push(p1Arena.shift()); } // collect all cards in the winner's arena
-		await sleep(10 * gameSpeed);
-		logArena();
-		while(p2Arena.length > 0){
-			p2Hand.push(p2Arena.pop());
-			await sleep(2 * gameSpeed);
-			logArena();
-		}
+		// player 2 wins battle
+		gameTaunt = player2Name + " Wins!"
+		while(p1Arena.length > 0){ p2Arena.push(p1Arena.shift()); await sleep(2 * gameSpeed); logArena();} // collect all cards in the winner's arena
+		await sleep(6 * gameSpeed);
+		while(p2Arena.length > 0){ p2Hand.push(p2Arena.pop()); await sleep(2 * gameSpeed); logArena();} // move the cards from the arena to the hand
+		await sleep(6 * gameSpeed);
 	} else {
 		// war
 		gameTaunt = "This is War!"
-		await sleep(500);
+		await sleep(20 * gameSpeed);
+		// Make sure there are enough cards in hand to war.
+		if((p1Hand.length > 1) && (p2Hand.length > 1)){
+			// Enough cards in hand for war
+			// Play the extra card into the arena
+			p1Arena.push(p1Hand.shift());
+			p2Arena.push(p2Hand.shift());
+			gameTaunt = "Up the Stakes!";
+			logArena();
+		} else { // Not enough cards for war. Someone lost the game
+			if(p1Hand.length < 2){ // player 1 lost
+				gameTaunt = "Not enough cards for " + player1Name;
+				// Clear out Player 1's Hand
+				while(p1Hand.length > 0){p1Arena.push(p1Hand.pop()); await sleep(2 * gameSpeed); logArena();} // bleed off player 1's hand to his arena
+				await sleep(6 * gameSpeed);
+
+				// Do standard moves for Player 2 victory
+				while(p1Arena.length > 0){ p2Arena.push(p1Arena.shift()); await sleep(2 * gameSpeed); logArena();} // collect all cards in the winner's arena
+				await sleep(6 * gameSpeed);
+				while(p2Arena.length > 0){ p2Hand.push(p2Arena.pop()); await sleep(2 * gameSpeed); logArena();} // move the cards from the arena to the hand
+				gameTaunt = player2Name + " Wins!"
+				await sleep(6 * gameSpeed);
+			}
+			if(p2Hand.length < 2){ // player 2 lost
+				gameTaunt = "Not enough cards for " + player2Name;
+				// Clear out Player 2's Hand
+				while(p2Hand.length > 0){p2Arena.push(p2Hand.pop()); await sleep(2 * gameSpeed); logArena();} // bleed off player 1's hand to his arena
+				await sleep(6 * gameSpeed);
+				
+				// Do the standard moves for player 1 victory
+				while(p2Arena.length > 0){ p1Arena.push(p2Arena.shift()); await sleep(2 * gameSpeed); logArena();} // collect all cards in the winner's arena
+				await sleep(6 * gameSpeed);
+				while(p1Arena.length > 0){ p1Hand.push(p1Arena.pop()); await sleep(2 * gameSpeed); logArena();} // move the cards from the arena to the hand
+				gameTaunt = player1Name + " Wins!"
+				await sleep(6 * gameSpeed);
+			}
+		}
 	}
 }
 
