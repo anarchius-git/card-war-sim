@@ -10,7 +10,8 @@ var gameRunning = false;
 var gameTaunt = "";
 var player1Name = "Player 1"
 var player2Name = "Player 2"
-const gameSpeed = 50; // This is the constant that is handling game speed. Smaller the number, faster the gameplay. All pauses should key off this value.
+var gameSpeed = 50; // This is the constant that is handling game speed. Smaller the number, faster the gameplay. All pauses should key off this value.
+var debugMode = false; // If you set debugMode to true, then all the hands and the deck will be printed in the console, remove for production
 
 function getSuit(cardID){
 	// A foundational function that returns the suite of a card given the card id
@@ -114,10 +115,38 @@ function printHand(playerID, emptyFlag){
 	}
 }
 
+function printArena(){
+	// This function refreshes the whole playing Arena. This function is designed to be set to an Interval
+	// Print the correct cards
+	if(p1Arena.length == 0){
+		printCard(1,-1,true);
+	} else {
+		printCard(1,p1Arena[p1Arena.length - 1],false);
+	}
+	if(p2Arena.length == 0){
+		printCard(2,-1,true);
+	} else {
+		printCard(2,p2Arena[p2Arena.length - 1],false);
+	}
+	// Update the scores and taunt messages
+	document.getElementById("p1-score").innerText = p1Hand.length;
+	document.getElementById("p2-score").innerText = p2Hand.length;
+	document.getElementById("taunt").innerText = gameTaunt;
+}
+
+function printGameSpeed(){
+	// Function updats the game speed badge
+	var gameSpeedBadge = document.getElementById("game-speed-badge");
+	gameSpeedBadge.innerHTML = (50 - gameSpeed)/10;
+}
+
 async function playGame() {
 	// This function shuffles the cards, deals then and plays the game
-	//shuffleDeck();
-	console.log("Shuffling the deck");
+	// The first step is to make sure the UI is ready to go
+	document.getElementById("gme-ctr-play").disabled = true; // disable the button
+	document.getElementById("gme-ctr-dynamic").innerText = "Speed Up Simulation"; // rename the button to Speed Up
+	document.getElementById("gme-ctr-dynamic").disabled = false; // disable the button
+	if(debugMode){console.log("Shuffling the deck");}
 	shuffleDeck();
 	await sleep(40 * gameSpeed); // sleep for 2 seconds
 	// Empty the front of the card
@@ -150,6 +179,53 @@ async function playGame() {
 			logArena();
 			await doBattle();
 		}
+	}
+	// The game is done. We need to clean things up, so rename the dynamic button
+	document.getElementById("gme-ctr-dynamic").innerText = "Reset Simulation"; // rename the button to Reset Simulation
+}
+
+function tweakGame(){
+	// This function handles the dynamic button function during the game play
+	var buttonText = document.getElementById("gme-ctr-dynamic").innerText;
+	if (buttonText == "Speed Up Simulation") {
+		// Speed up the simulation
+		switch(gameSpeed) {
+			case 50:
+				gameSpeed = 40;
+				break;
+			case 40:
+				gameSpeed = 30;
+				break;
+			case 30:
+				gameSpeed = 20;
+				break;
+			case 20:
+				gameSpeed = 10;
+				break;
+			default:
+				gameSpeed = 0;
+		}
+		printGameSpeed();
+	}
+	if (buttonText == "Reset Simulation") {
+		// Bring everything back to starting
+		deck = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+		p1Hand = [];
+		p1Arena = [];
+		p2Hand = [];
+		p2Arena = [];
+		gameSpeed = 50;
+		// Reflect the UI
+		printCard(1, -1, true);
+		printCard(2, -1, true);
+		printHand(1, true);
+		printHand(2, true);
+		printGameSpeed();
+		gameTaunt = "";
+		printArena();
+		document.getElementById("gme-ctr-dynamic").innerText = "Game Controls";
+		document.getElementById("gme-ctr-dynamic").disabled = true;
+		document.getElementById("gme-ctr-play").disabled = false;
 	}
 }
 
@@ -215,32 +291,17 @@ async function doBattle(){
 }
 
 function logArena(){
-	console.log("Player 1 Arena: ", p1Arena);
-	console.log("Player 2 Arena: ", p2Arena);
+	if(debugMode){
+		console.log("Player 1 Arena: ", p1Arena);
+		console.log("Player 2 Arena: ", p2Arena);
+	}
 }
 
 function logHands(){
-	console.log("Player 1 Hand: ", p1Hand);
-	console.log("Player 2 Hand: ", p2Hand);
-}
-
-function printArena(){
-	// This function refreshes the whole playing Arena. This function is designed to be set to an Interval
-	// Print the correct cards
-	if(p1Arena.length == 0){
-		printCard(1,-1,true);
-	} else {
-		printCard(1,p1Arena[p1Arena.length - 1],false);
+	if(debugMode){
+		console.log("Player 1 Hand: ", p1Hand);
+		console.log("Player 2 Hand: ", p2Hand);
 	}
-	if(p2Arena.length == 0){
-		printCard(2,-1,true);
-	} else {
-		printCard(2,p2Arena[p2Arena.length - 1],false);
-	}
-	// Update the scores and taunt messages
-	document.getElementById("p1-score").innerText = p1Hand.length;
-	document.getElementById("p2-score").innerText = p2Hand.length;
-	document.getElementById("taunt").innerText = gameTaunt;
 }
 
 function dealDeck() {
@@ -280,7 +341,6 @@ function swap2RandomCards(){
 	// Stop shuffling
 	if(shuffleTimes < 0) {
 		clearInterval(refreshTimer);
-		console.log(deck);
 		printCard(1,-1,false);
 		printCard(2,-1,false);
 	}
